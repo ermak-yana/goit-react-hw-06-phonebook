@@ -1,30 +1,36 @@
 import PropTypes from "prop-types";
-import css from "../PhoneList/PhoneList.module.css";
 import PhoneItem from "../PhoneItem/PhoneItem";
+import { useSelector } from "react-redux";
+import {
+  selectContactItem,
+  selectFilter,
+} from "../../redux/contacts/selectors/selectors";
+import css from "../PhoneList/PhoneList.module.css";
 
-function createContactList({ title, filterContact, removeContact }) {
+const CreateContactList = ({ title }) => {
+  const listConcacts = useSelector(selectContactItem);
+  const payload = useSelector(selectFilter);
+
+  const filterContact = () => {
+    return listConcacts.filter(({ name }) =>
+      name.toLowerCase().includes(payload)
+    );
+  };
+
   return (
     <section className={css.block}>
       <h2 className={css.title}>{title}</h2>
       <ul className={css.list}>
         {filterContact().map(({ id, name, number }) => (
-          <PhoneItem
-            key={id}
-            id={id}
-            name={name}
-            number={number}
-            removeContact={removeContact}
-          />
+          <PhoneItem key={id} id={id} name={name} number={number} />
         ))}
       </ul>
     </section>
   );
-}
-
-createContactList.propTypes = {
-  title: PropTypes.string,
-  filterContact: PropTypes.func,
-  removeContact: PropTypes.func,
 };
 
-export default createContactList;
+CreateContactList.propTypes = {
+  title: PropTypes.string,
+};
+
+export default CreateContactList;

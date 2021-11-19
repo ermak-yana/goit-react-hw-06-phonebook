@@ -1,11 +1,14 @@
-import { addContact } from "../../redux/contacts/action";
 import PropTypes from "prop-types";
-import { useState } from "react";
-import { connect } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addContact } from "../../redux/contacts/slice/slice";
+import { selectContactItem } from "../../redux/contacts/selectors/selectors";
 import css from "../FormSubmit/FormSubmit.module.css";
 
-function FormSubmit({ phone, title, addContact, onAdd }) {
+function FormSubmit({ phone, title }) {
+  const dispatch = useDispatch();
+  const listConcacts = useSelector(selectContactItem);
   const [name, setName] = useState("");
   const [number, setNumder] = useState("");
 
@@ -17,15 +20,28 @@ function FormSubmit({ phone, title, addContact, onAdd }) {
     setNumder(e.target.value);
   };
 
+  const submitContact = (contact) => {
+    if (!checkContact(contact.name)) {
+      dispatch(addContact(contact));
+    } else {
+      alert(`${contact.name} is alredy in contacts`);
+    }
+  };
+
+  const checkContact = (name) => {
+    return listConcacts.find(
+      (contact) => contact.name.toLowerCase() === name.toLowerCase()
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const contacts = {
+    const contact = {
       id: uuidv4(),
       name,
       number,
     };
-    // addContact(contacts);
-    onAdd(contacts);
+    submitContact(contact);
     setName("");
     setNumder("");
   };
@@ -68,18 +84,7 @@ function FormSubmit({ phone, title, addContact, onAdd }) {
 
 FormSubmit.propType = {
   title: PropTypes.string,
-  addContact: PropTypes.func,
   phone: PropTypes.string,
 };
-const mapStateToProps = (state) => {
-  return {
-    contactsList: state.contact,
-  };
-};
-const mapDispatchToProps = (dispatch) => {
-  return {
-    onAdd: (contacts) => dispatch(addContact(contacts)),
-  };
-};
 
-export default connect(mapStateToProps, mapDispatchToProps)(FormSubmit);
+export default FormSubmit;
